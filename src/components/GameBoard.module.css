@@ -1,0 +1,13 @@
+.wrap {
+  border: 1px solid rgb(231 238 245 / 10%);
+  border-radius: 16px;
+  background: linear-gradient(150deg, rgb(7 11 16 / 95%), rgb(4 8 12 / 95%));
+  padding: clamp(10px, 2vw, 18px);
+}
+
+.grid {
+  display: grid;
+  gap: 8px;
+  width: min(92vmin, 720px);
+  margin-inline: auto;
+}

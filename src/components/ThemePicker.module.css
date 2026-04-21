@@ -1,0 +1,62 @@
+.wrap {
+  width: min(980px, 100%);
+  display: grid;
+  gap: 20px;
+  background: linear-gradient(145deg, rgb(7 12 18 / 90%), rgb(5 8 12 / 96%));
+  border: 1px solid rgb(231 238 245 / 12%);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+header h2 {
+  margin: 0;
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 8px 0 0;
+  color: var(--text-dim);
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+  border: 1px solid color-mix(in oklab, var(--card-accent), white 30%);
+  background:
+    radial-gradient(circle at top right, color-mix(in oklab, var(--card-accent), transparent 75%), transparent 55%),
+    linear-gradient(140deg, rgb(8 15 20 / 92%), rgb(6 10 15 / 95%));
+  border-radius: 14px;
+  color: var(--text-0);
+  padding: 18px;
+  min-height: 132px;
+  display: grid;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--card-accent);
+}
+
+.emoji {
+  font-size: 1.4rem;
+}
+
+.card strong {
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.card small {
+  color: #b6c6d4;
+  line-height: 1.5;
+}

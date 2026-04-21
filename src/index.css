@@ -1,0 +1,38 @@
+:root {
+  font-family: 'DM Mono', monospace;
+  color: #e7eef5;
+  background: #04070b;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  --bg-0: #04070b;
+  --bg-1: #0b1118;
+  --bg-2: #121a24;
+  --text-0: #e7eef5;
+  --text-dim: #8ca2b6;
+  --danger: #ff4d67;
+  --success: #35f3a2;
+  --accent: #00f5ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 15%, rgb(0 245 255 / 8%), transparent 30%),
+    radial-gradient(circle at 80% 85%, rgb(53 243 162 / 8%), transparent 25%),
+    linear-gradient(165deg, var(--bg-0), #070d13 50%, #020407 100%);
+}
+
+button {
+  font-family: inherit;
+}

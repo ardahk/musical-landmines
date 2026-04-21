@@ -1,0 +1,50 @@
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgb(231 238 245 / 12%);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgb(10 15 20 / 92%), rgb(6 9 13 / 95%));
+}
+
+.hud > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud strong {
+  font-family: 'Syne', sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.hud span {
+  color: #c3d3e0;
+}
+
+.lifeLabel {
+  color: #fef6cf;
+}
+
+.timer {
+  color: #a8f4d3;
+}
+
+.timerDanger {
+  color: var(--danger);
+}
+
+.theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme i {
+  width: 9px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: inline-block;
+}
