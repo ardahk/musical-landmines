@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer } from 'react'
-import { cloneGrid, createNeighborMap, generateGrid, isWinCondition } from '../game/gridGenerator'
+import { cloneGrid, createNeighborMap, generateGrid, isWinCondition, isReachable } from '../game/gridGenerator'
 import { MAX_ROUNDS, getRoundConfig } from '../game/constants'
 import { calculateRoundScore } from '../game/scoring'
 
@@ -118,6 +118,9 @@ function reducer(state, action) {
       const { x, y } = action.payload
       const original = state.grid[y]?.[x]
       if (!original || original.state !== 'hidden') {
+        return state
+      }
+      if (!isReachable(state.grid, x, y)) {
         return state
       }
 
