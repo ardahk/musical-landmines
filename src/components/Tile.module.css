@@ -1,4 +1,6 @@
 .tile {
+  --arming-progress: 0deg;
+  position: relative;
   width: 100%;
   border: 1px solid rgb(231 238 245 / 10%);
   background:
@@ -11,6 +13,7 @@
   font-size: 0.92rem;
   cursor: pointer;
   transition: transform 80ms ease, filter 80ms ease, border-color 80ms ease;
+  overflow: hidden;
 }
 
 .tile:hover {
@@ -19,27 +22,59 @@
 }
 
 .arming {
-  border-color: rgb(0 245 255 / 45%);
-  box-shadow: inset 0 0 0 1px rgb(0 245 255 / 30%);
+  border-color: color-mix(in oklab, var(--accent), transparent 55%);
+}
+
+.arming::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1.5px;
+  background: conic-gradient(
+    var(--accent) var(--arming-progress),
+    transparent var(--arming-progress)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.9;
 }
 
 .start {
-  box-shadow: inset 0 0 0 1px rgb(53 243 162 / 35%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent), transparent 55%);
+  color: color-mix(in oklab, var(--accent), white 30%);
 }
 
 .goal {
   animation: pulseOutline 1.4s ease-in-out infinite;
+  color: color-mix(in oklab, var(--accent), white 30%);
+}
+
+.markerIcon {
+  width: 55%;
+  height: 55%;
+  opacity: 0.75;
 }
 
 .visited {
-  background: linear-gradient(160deg, rgb(23 34 46 / 96%), rgb(16 26 36 / 96%));
+  background: linear-gradient(160deg, rgb(34 48 64 / 96%), rgb(22 34 48 / 96%));
+  border-color: rgb(231 238 245 / 18%);
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: color-mix(in oklab, var(--accent), white 25%);
+  background: color-mix(in oklab, var(--accent), white 35%);
+  box-shadow: 0 0 6px color-mix(in oklab, var(--accent), transparent 40%);
+}
+
+.mineIcon {
+  color: #ffb3c0;
+  font-size: 1.1rem;
 }
 
 .exploded {
@@ -69,9 +104,20 @@
 @keyframes pulseOutline {
   0%,
   100% {
-    box-shadow: 0 0 0 1px rgb(0 245 255 / 20%);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent), transparent 80%);
   }
   50% {
-    box-shadow: 0 0 0 1px rgb(0 245 255 / 75%);
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent), transparent 20%), 0 0 10px color-mix(in oklab, var(--accent), transparent 60%);
   }
+}
+
+.locked {
+  opacity: 0.4;
+  filter: saturate(0.25);
+}
+
+.locked:hover {
+  transform: none;
+  filter: saturate(0.25) brightness(1);
+  cursor: not-allowed;
 }
