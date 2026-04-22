@@ -20,6 +20,7 @@ const SAFE_PATH_OFFSETS = [
 ]
 
 function buildCell(x, y, size) {
+  const isStart = x === 0 && y === size - 1
   return {
     id: `${x},${y}`,
     x,
@@ -27,8 +28,8 @@ function buildCell(x, y, size) {
     isMine: false,
     isPath: false,
     adjacentMines: 0,
-    state: 'hidden',
-    isStart: x === 0 && y === size - 1,
+    state: isStart ? 'visited' : 'hidden',
+    isStart,
     isGoal: x === size - 1 && y === 0,
   }
 }

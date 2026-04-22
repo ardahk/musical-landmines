@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, test } from 'vitest'
 import { generateGrid, getNeighbors } from './gridGenerator'
 
 function hasPathToGoal(grid) {
@@ -57,5 +57,11 @@ describe('gridGenerator', () => {
         expect(grid[y][x].adjacentMines).toBe(expected)
       }
     }
+  })
+
+  test('start tile begins as visited', () => {
+    const grid = generateGrid(6, 0.3)
+    const startCell = grid[5][0] // x=0, y=size-1
+    expect(startCell.state).toBe('visited')
   })
 })
