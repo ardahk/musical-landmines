@@ -81,6 +81,11 @@
   outline-offset: -1px;
 }
 
+.miniPlayerPath {
+  background: color-mix(in oklab, var(--accent), transparent 25%);
+  box-shadow: 0 0 3px color-mix(in oklab, var(--accent), transparent 40%);
+}
+
 .actions {
   display: flex;
   gap: 10px;

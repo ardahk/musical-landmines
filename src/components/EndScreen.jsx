@@ -6,6 +6,7 @@ function MiniGrid({ grid }) {
       {grid.flat().map((cell, index) => {
         let className = styles.miniCell
         if (cell.exploded) className = `${className} ${styles.miniExploded}`
+        else if (cell.playerPath) className = `${className} ${styles.miniPlayerPath}`
         else if (cell.visited) className = `${className} ${styles.miniVisited}`
         else if (cell.mine) className = `${className} ${styles.miniMine}`
         else if (cell.path) className = `${className} ${styles.miniPath}`

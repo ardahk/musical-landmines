@@ -40,13 +40,14 @@ function initialState() {
   }
 }
 
-function compressGrid(grid) {
+function compressGrid(grid, playerPath) {
   return grid.map((row) =>
     row.map((cell) => ({
       mine: cell.isMine,
       visited: cell.state === 'visited',
       exploded: cell.state === 'exploded',
       path: cell.isPath,
+      playerPath: playerPath?.has(cell.id) ?? false,
     })),
   )
 }
@@ -68,7 +69,7 @@ function finishRound(state, nextScreen) {
     size: state.roundConfig.size,
     score: breakdown.finalScore,
     livesAfter: state.lives,
-    grid: compressGrid(state.grid),
+    grid: compressGrid(state.grid, state.playerPath),
   }
 
   return {
