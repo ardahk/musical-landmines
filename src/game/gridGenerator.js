@@ -139,9 +139,7 @@ export function isReachable(grid, x, y) {
   for (const [dx, dy] of ADJ_OFFSETS) {
     const nx = x + dx
     const ny = y + dy
-    if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
-      if (grid[ny][nx].state === 'visited') return true
-    }
+    if (inBounds(size, nx, ny) && grid[ny][nx].state === 'visited') return true
   }
   return false
 }

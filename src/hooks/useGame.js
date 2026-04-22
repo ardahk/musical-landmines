@@ -17,6 +17,10 @@ function createRoundState(round) {
   }
 }
 
+function startPlayerPath(size) {
+  return new Set([`0,${size - 1}`])
+}
+
 function initialState() {
   const round = 1
   const roundState = createRoundState(round)
@@ -36,7 +40,7 @@ function initialState() {
     history: [],
     lastRoundBreakdown: null,
     audioEnabled: false,
-    playerPath: new Set(),
+    playerPath: startPlayerPath(roundState.roundConfig.size),
   }
 }
 
@@ -102,7 +106,7 @@ function reducer(state, action) {
         themeKey: action.payload.themeKey,
         audioEnabled: state.audioEnabled,
         startTimeMs: Date.now(),
-        playerPath: new Set(),
+        playerPath: startPlayerPath(fresh.roundConfig.size),
       }
     }
 
@@ -170,7 +174,7 @@ function reducer(state, action) {
         startTimeMs: Date.now(),
         elapsedMs: 0,
         lastRoundBreakdown: null,
-        playerPath: new Set(),
+        playerPath: startPlayerPath(roundState.roundConfig.size),
       }
     }
 
@@ -219,6 +223,9 @@ export function useGame() {
         dispatch({ type: 'REVEAL_TILE', payload: { x, y } })
         const targetCell = previous.grid[y]?.[x]
         if (!targetCell || targetCell.state !== 'hidden') {
+          return null
+        }
+        if (!isReachable(previous.grid, x, y)) {
           return null
         }
         if (targetCell.isMine && previous.lives <= 1) {

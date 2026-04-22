@@ -130,8 +130,9 @@ function detuneForLevel(level) {
   }
 }
 
-// Level 0 = root (safe/low), level 4 = octave above (danger/high)
-const PROXIMITY_DEGREES = [0, 2, 4, 5, 8]
+// Level 0 = root (safe/low), level 4 = root one octave up (danger/high).
+// Index 7 equals scale.length for the default 7-note scale, so octaveBonus=12 fires and scale[0] = root.
+const PROXIMITY_DEGREES = [0, 2, 4, 5, 7]
 
 function proximityPitch(adjacentMines, theme) {
   const scale = theme?.scale ?? DEFAULT_SCALE
@@ -259,27 +260,6 @@ export function playTileSound(tile, { volumeDb = 0 } = {}) {
   const detuneCents = detuneForLevel(level)
 
   playSynth(base, { volumeDb, note, extraEffects, detuneCents, pan })
-}
-
-// Kept for backwards compatibility; delegates to tile-based sound when possible.
-export function playProximitySound(adjacentMines, _variant, volumeDb = 0) {
-  void _variant
-  const now = nowMs()
-  if (now - lastHoverAt < 80) {
-    return
-  }
-  lastHoverAt = now
-
-  if (!currentTheme) return
-  const base = getBaseVoice(currentTheme)
-  if (!base) return
-
-  const level = getLevel(adjacentMines)
-  playSynth(base, {
-    volumeDb,
-    extraEffects: buildTimbreEffects(level),
-    detuneCents: detuneForLevel(level),
-  })
 }
 
 export function playMineExplosion() {
