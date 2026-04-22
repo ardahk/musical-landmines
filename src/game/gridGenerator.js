@@ -133,3 +133,15 @@ export function isWinCondition(grid, goal) {
 export function cloneGrid(grid) {
   return grid.map((row) => row.map((cell) => ({ ...cell })))
 }
+
+export function isReachable(grid, x, y) {
+  const size = grid.length
+  for (const [dx, dy] of ADJ_OFFSETS) {
+    const nx = x + dx
+    const ny = y + dy
+    if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
+      if (grid[ny][nx].state === 'visited') return true
+    }
+  }
+  return false
+}

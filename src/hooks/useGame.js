@@ -36,6 +36,7 @@ function initialState() {
     history: [],
     lastRoundBreakdown: null,
     audioEnabled: false,
+    playerPath: new Set(),
   }
 }
 
@@ -100,6 +101,7 @@ function reducer(state, action) {
         themeKey: action.payload.themeKey,
         audioEnabled: state.audioEnabled,
         startTimeMs: Date.now(),
+        playerPath: new Set(),
       }
     }
 
@@ -132,7 +134,9 @@ function reducer(state, action) {
       }
 
       cell.state = 'visited'
-      const nextState = { ...state, grid }
+      const playerPath = new Set(state.playerPath)
+      playerPath.add(cell.id)
+      const nextState = { ...state, grid, playerPath }
 
       if (isWinCondition(grid, state.goal)) {
         if (state.round >= MAX_ROUNDS) {
@@ -162,6 +166,7 @@ function reducer(state, action) {
         startTimeMs: Date.now(),
         elapsedMs: 0,
         lastRoundBreakdown: null,
+        playerPath: new Set(),
       }
     }
 

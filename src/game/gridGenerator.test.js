@@ -1,5 +1,5 @@
-import { describe, expect, it, test } from 'vitest'
-import { generateGrid, getNeighbors } from './gridGenerator'
+import { describe, expect, it } from 'vitest'
+import { generateGrid, getNeighbors, isReachable } from './gridGenerator'
 
 function hasPathToGoal(grid) {
   const size = grid.length
@@ -59,9 +59,23 @@ describe('gridGenerator', () => {
     }
   })
 
-  test('start tile begins as visited', () => {
+  it('start tile begins as visited', () => {
     const grid = generateGrid(6, 0.3)
     const startCell = grid[5][0] // x=0, y=size-1
     expect(startCell.state).toBe('visited')
+  })
+
+  it('tile adjacent to visited start is reachable', () => {
+    const grid = generateGrid(6, 0)
+    // start is at (0,5) and is visited; neighbours should be reachable
+    expect(isReachable(grid, 1, 5)).toBe(true)
+    expect(isReachable(grid, 0, 4)).toBe(true)
+    expect(isReachable(grid, 1, 4)).toBe(true)
+  })
+
+  it('tile not adjacent to any visited tile is not reachable', () => {
+    const grid = generateGrid(6, 0)
+    // goal at (5,0) — far from start, no visited neighbours
+    expect(isReachable(grid, 5, 0)).toBe(false)
   })
 })
