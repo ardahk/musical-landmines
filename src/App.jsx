@@ -9,7 +9,7 @@ import TransitionScreen from './components/TransitionScreen'
 import { useGame } from './hooks/useGame'
 import { useAudio } from './hooks/useAudio'
 import { themeMap, themesList } from './audio/themes'
-import { readLeaderboard, readPlayerName, recordLeaderboardScore } from './game/leaderboard'
+import { addPlayerScore, readPlayerScore } from './game/playerScore'
 
 function isDesktopSupported() {
   if (typeof window === 'undefined') {
@@ -22,8 +22,7 @@ function isDesktopSupported() {
 
 export default function App() {
   const desktopSupported = useMemo(() => isDesktopSupported(), [])
-  const [leaderboard, setLeaderboard] = useState(() => readLeaderboard())
-  const [playerName, setPlayerName] = useState(() => readPlayerName())
+  const [yourScore, setYourScore] = useState(() => readPlayerScore())
   const [savedScoreKey, setSavedScoreKey] = useState(null)
   const [musicMuted, setMusicMutedState] = useState(false)
   const [musicLevel, setMusicLevel] = useState(120)
@@ -124,38 +123,27 @@ export default function App() {
     playHover({ tile: exampleTiles[level] ?? exampleTiles.low })
   }
 
-  const yourScore = useMemo(() => {
-    const cleanedName = playerName.trim().toLowerCase()
-    if (!cleanedName) {
-      return 0
-    }
-    return leaderboard.find((entry) => entry.name.toLowerCase() === cleanedName)?.score ?? 0
-  }, [leaderboard, playerName])
-
   const currentScoreKey = state.screen === 'win' || state.screen === 'gameOver'
     ? `${state.startTimeMs}:${state.totalScore}:${state.history.length}`
     : null
 
-  const saveScore = useCallback((name, score, scoreKey) => {
-    const cleanedName = name.trim().replace(/\s+/g, ' ').slice(0, 24)
-    if (!cleanedName || !scoreKey) {
+  const saveScore = useCallback((score, scoreKey) => {
+    if (!scoreKey) {
       return
     }
-    const nextLeaderboard = recordLeaderboardScore(cleanedName, score)
-    setLeaderboard(nextLeaderboard)
-    setPlayerName(cleanedName)
+    setYourScore(addPlayerScore(score))
     setSavedScoreKey(scoreKey)
   }, [])
 
   useEffect(() => {
-    if ((state.screen === 'win' || state.screen === 'gameOver') && playerName && currentScoreKey && savedScoreKey !== currentScoreKey) {
+    if ((state.screen === 'win' || state.screen === 'gameOver') && currentScoreKey && savedScoreKey !== currentScoreKey) {
       const timeoutId = window.setTimeout(() => {
-        saveScore(playerName, state.totalScore, currentScoreKey)
+        saveScore(state.totalScore, currentScoreKey)
       }, 0)
       return () => window.clearTimeout(timeoutId)
     }
     return undefined
-  }, [currentScoreKey, playerName, saveScore, savedScoreKey, state.screen, state.totalScore])
+  }, [currentScoreKey, saveScore, savedScoreKey, state.screen, state.totalScore])
 
   useEffect(() => {
     if (!state.audioEnabled || musicMuted) {
@@ -326,9 +314,6 @@ export default function App() {
           breakdown={state.lastRoundBreakdown}
           history={state.history}
           canContinue={state.lives > 0}
-          playerName={playerName}
-          scoreSaved={false}
-          onSaveScore={() => {}}
           onContinue={nextRound}
           onReset={reset}
         />
@@ -343,9 +328,6 @@ export default function App() {
           breakdown={state.lastRoundBreakdown}
           history={state.history}
           canContinue={false}
-          playerName={playerName}
-          scoreSaved={savedScoreKey === currentScoreKey}
-          onSaveScore={(name) => saveScore(name, state.totalScore, currentScoreKey)}
           onContinue={nextRound}
           onReset={reset}
         />
@@ -360,9 +342,6 @@ export default function App() {
           breakdown={state.lastRoundBreakdown}
           history={state.history}
           canContinue={false}
-          playerName={playerName}
-          scoreSaved={savedScoreKey === currentScoreKey}
-          onSaveScore={(name) => saveScore(name, state.totalScore, currentScoreKey)}
           onContinue={nextRound}
           onReset={reset}
         />

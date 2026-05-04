@@ -32,21 +32,11 @@ export default function EndScreen({
   breakdown,
   history,
   canContinue,
-  playerName,
-  scoreSaved,
-  onSaveScore,
   onContinue,
   onReset,
 }) {
   const title =
     mode === 'gameover' ? 'Game Over' : mode === 'win' ? 'Mission Complete' : `Round ${round} Complete`
-  const showScoreForm = (mode === 'win' || mode === 'gameover') && !scoreSaved
-
-  const handleScoreSubmit = (event) => {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    onSaveScore(formData.get('name')?.toString() ?? '')
-  }
 
   return (
     <section className={styles.wrap}>
@@ -72,24 +62,6 @@ export default function EndScreen({
           </article>
         ))}
       </div>
-
-      {showScoreForm && (
-        <form className={styles.scoreForm} onSubmit={handleScoreSubmit}>
-          <label htmlFor="player-name">Name for leaderboard</label>
-          <div>
-            <input
-              id="player-name"
-              name="name"
-              type="text"
-              defaultValue={playerName}
-              maxLength={24}
-              autoComplete="nickname"
-              required
-            />
-            <button type="submit">Save Score</button>
-          </div>
-        </form>
-      )}
 
       <div className={styles.actions}>
         {mode === 'round' && canContinue ? (
