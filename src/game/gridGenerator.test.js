@@ -49,6 +49,18 @@ describe('gridGenerator', () => {
     }
   })
 
+  it('keeps every guaranteed path tile out of completely red-surrounded danger', () => {
+    for (let i = 0; i < 50; i += 1) {
+      const grid = generateGrid(8, 0.55)
+      const pathCells = grid.flat().filter((cell) => cell.isPath)
+
+      for (const cell of pathCells) {
+        expect(cell.isMine).toBe(false)
+        expect(getNeighbors(grid, cell.x, cell.y).some((neighbor) => !neighbor.isMine)).toBe(true)
+      }
+    }
+  })
+
   it('computes adjacent mine counts correctly', () => {
     const grid = generateGrid(7, 0.4)
     for (let y = 0; y < grid.length; y += 1) {

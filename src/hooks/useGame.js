@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer } from 'react'
-import { cloneGrid, createNeighborMap, generateGrid, isWinCondition, isReachable } from '../game/gridGenerator'
+import { cloneGrid, generateGrid, isWinCondition, isReachable } from '../game/gridGenerator'
 import { MAX_ROUNDS, getRoundConfig } from '../game/constants'
 import { calculateRoundScore } from '../game/scoring'
 
@@ -11,7 +11,6 @@ function createRoundState(round) {
   return {
     roundConfig,
     grid,
-    gridMeta: { neighborMap: createNeighborMap(grid) },
     start: { x: 0, y: roundConfig.size - 1 },
     goal: { x: roundConfig.size - 1, y: 0 },
   }
@@ -102,13 +101,22 @@ function reducer(state, action) {
       const fresh = initialState()
       return {
         ...fresh,
-        screen: 'game',
+        screen: 'transition',
         themeKey: action.payload.themeKey,
         audioEnabled: state.audioEnabled,
-        startTimeMs: Date.now(),
         playerPath: startPlayerPath(fresh.roundConfig.size),
       }
     }
+
+    case 'ENTER_GAME':
+      if (state.screen !== 'transition') {
+        return state
+      }
+      return {
+        ...state,
+        screen: 'game',
+        startTimeMs: Date.now(),
+      }
 
     case 'ENABLE_AUDIO':
       return { ...state, audioEnabled: true }
@@ -216,6 +224,7 @@ export function useGame() {
     () => ({
       begin: () => dispatch({ type: 'START_GAME' }),
       chooseTheme: (themeKey) => dispatch({ type: 'SELECT_THEME', payload: { themeKey } }),
+      enterGame: () => dispatch({ type: 'ENTER_GAME' }),
       enableAudio: () => dispatch({ type: 'ENABLE_AUDIO' }),
       registerHover: ({ x, y }) => dispatch({ type: 'REGISTER_HOVER', payload: { x, y } }),
       revealTile: ({ x, y }) => {

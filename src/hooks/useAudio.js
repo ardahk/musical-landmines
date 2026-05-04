@@ -1,35 +1,21 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   initializeAudio,
+  playTransitionMusic,
   playMineExplosion,
-  playProximitySound,
   playRoundComplete,
   playSuccess,
+  playTileSound,
   setTheme,
+  setMusicLevel,
+  setMusicMuted,
+  setSfxLevel,
+  startMenuMusic,
+  startThemeMusic,
+  stopMusic,
 } from '../audio/audioEngine'
 
-function pickVariant(round, forceVariant) {
-  if (forceVariant) {
-    return forceVariant
-  }
-  if (round < 3) {
-    return 'a'
-  }
-  return Math.random() < 0.5 ? 'a' : 'b'
-}
-
-function pickBlurNeighbors(neighborCounts) {
-  if (!neighborCounts || neighborCounts.length === 0) {
-    return []
-  }
-  const count = 1 + Math.floor(Math.random() * 2)
-  const shuffled = [...neighborCounts].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
-}
-
 export function useAudio(theme) {
-  const [status, setStatus] = useState('idle')
-
   useEffect(() => {
     if (theme) {
       setTheme(theme)
@@ -38,7 +24,6 @@ export function useAudio(theme) {
 
   const initAudio = useCallback(async () => {
     const ok = await initializeAudio()
-    setStatus(ok ? 'ready' : 'failed')
     return ok
   }, [])
 
@@ -46,25 +31,36 @@ export function useAudio(theme) {
     setTheme(nextTheme)
   }, [])
 
-  const playHover = useCallback(({ adjacentMines, round, neighborCounts = [], forceVariant = null }) => {
-    const variant = pickVariant(round, forceVariant)
-    playProximitySound(adjacentMines, variant)
+  const playHover = useCallback(({ tile, volumeDb = 0 }) => {
+    if (!tile) return
+    playTileSound(tile, { volumeDb })
+  }, [])
 
-    if (round >= 5) {
-      const blurNeighbors = pickBlurNeighbors(neighborCounts)
-      blurNeighbors.forEach((neighborCount) => {
-        playProximitySound(neighborCount, pickVariant(round), -14)
-      })
-    }
+  const muteMusic = useCallback((nextMuted) => {
+    setMusicMuted(nextMuted)
+  }, [])
+
+  const changeMusicLevel = useCallback((level) => {
+    setMusicLevel(level)
+  }, [])
+
+  const changeSfxLevel = useCallback((level) => {
+    setSfxLevel(level)
   }, [])
 
   return {
-    status,
     initAudio,
     setAudioTheme,
+    changeMusicLevel,
+    changeSfxLevel,
+    muteMusic,
+    playTransitionMusic,
     playHover,
     playExplosion: playMineExplosion,
     playRoundComplete,
     playSuccess,
+    startMenuMusic,
+    startThemeMusic,
+    stopMusic,
   }
 }

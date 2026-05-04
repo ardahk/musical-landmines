@@ -86,12 +86,42 @@
   box-shadow: 0 0 3px color-mix(in oklab, var(--accent), transparent 40%);
 }
 
+.scoreForm {
+  display: grid;
+  gap: 8px;
+  width: min(420px, 100%);
+  border: 1px solid rgb(231 238 245 / 12%);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.scoreForm label {
+  color: #b8cbd9;
+  font-size: 0.86rem;
+}
+
+.scoreForm div {
+  display: flex;
+  gap: 8px;
+}
+
+.scoreForm input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid rgb(231 238 245 / 14%);
+  border-radius: 8px;
+  background: rgb(5 10 15 / 90%);
+  color: var(--text-0);
+  padding: 10px 12px;
+}
+
 .actions {
   display: flex;
   gap: 10px;
 }
 
-.actions button {
+.actions button,
+.scoreForm button {
   border: 1px solid rgb(0 245 255 / 35%);
   background: linear-gradient(145deg, rgb(0 245 255 / 18%), rgb(0 245 255 / 6%));
   color: var(--text-0);

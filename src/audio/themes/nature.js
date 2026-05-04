@@ -4,6 +4,8 @@ const nature = {
   emoji: '🌿',
   description: 'Birds, wind, and rustling tension',
   colorAccent: '#4ade80',
+  scale: [0, 2, 4, 7, 9],
+  rootNote: 'G3',
   proximity: {
     0: {
       a: { engine: 'fm', oscillator: 'sine', note: 'A5', release: '16n', envelope: { attack: 0.002, decay: 0.16, sustain: 0, release: 0.08 } },

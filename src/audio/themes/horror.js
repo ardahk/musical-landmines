@@ -4,6 +4,8 @@ const horror = {
   emoji: '🩸',
   description: 'Whispers, dread, and scraping dissonance',
   colorAccent: '#f87171',
+  scale: [0, 1, 3, 5, 6, 8, 10],
+  rootNote: 'A2',
   proximity: {
     0: {
       a: { engine: 'synth', oscillator: 'sine', note: 'A4', release: '8n', envelope: { attack: 0.03, decay: 0.2, sustain: 0.02, release: 0.25 }, effects: [{ type: 'reverb', wet: 0.45, decay: 2.5 }] },

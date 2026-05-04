@@ -4,6 +4,8 @@ const scifi = {
   emoji: '🚀',
   description: 'Sonar pings and alien signals',
   colorAccent: '#00f5ff',
+  scale: [0, 2, 3, 5, 7, 8, 10],
+  rootNote: 'C3',
   proximity: {
     0: {
       a: { engine: 'synth', oscillator: 'sine', note: 'C5', release: '8n', envelope: { attack: 0.005, decay: 0.2, sustain: 0, release: 0.1 }, effects: [{ type: 'reverb', wet: 0.25, decay: 1.4 }] },

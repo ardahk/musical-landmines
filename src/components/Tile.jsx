@@ -25,7 +25,7 @@ export default function Tile({ cell, isGoal, isStart, disabled, hoverDelayMs = 4
     }
 
     if (delay === 0) {
-      onHoverIntent({ x: cell.x, y: cell.y, adjacentMines: cell.adjacentMines })
+      onHoverIntent({ x: cell.x, y: cell.y, adjacentMines: cell.adjacentMines, isMine: cell.isMine })
       setArming(false)
       return
     }
@@ -44,7 +44,7 @@ export default function Tile({ cell, isGoal, isStart, disabled, hoverDelayMs = 4
     rafRef.current = requestAnimationFrame(tick)
 
     timeoutRef.current = window.setTimeout(() => {
-      onHoverIntent({ x: cell.x, y: cell.y, adjacentMines: cell.adjacentMines })
+      onHoverIntent({ x: cell.x, y: cell.y, adjacentMines: cell.adjacentMines, isMine: cell.isMine })
       setArming(false)
     }, delay)
   }
@@ -80,7 +80,7 @@ export default function Tile({ cell, isGoal, isStart, disabled, hoverDelayMs = 4
       onMouseEnter={startHoverTimer}
       onMouseLeave={clearHoverTimer}
       onClick={() => onReveal({ x: cell.x, y: cell.y })}
-      disabled={disabled || cell.state !== 'hidden'}
+      disabled={disabled || cell.state !== 'hidden' || !reachable}
       aria-label={`Tile ${cell.x}, ${cell.y}`}
     >
       {cell.state === 'exploded' && <span className={styles.mineIcon}>☠</span>}

@@ -11,6 +11,14 @@ node_modules
 dist
 dist-ssr
 *.local
+coverage
+.vite
+
+# Local assistant/tooling state
+.claude
+
+# This project uses npm/package-lock.json
+bun.lock
 
 # Editor directories and files
 .vscode/*

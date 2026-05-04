@@ -4,6 +4,7 @@
   display: grid;
   place-items: center;
   padding: 24px;
+  position: relative;
 }
 
 .centeredWrap {
@@ -41,12 +42,78 @@
   gap: 16px;
 }
 
-.audioPrompt {
-  border: 1px solid rgb(0 245 255 / 40%);
-  background: rgb(0 245 255 / 10%);
+.audioControls {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 10;
+  width: 190px;
+}
+
+.audioControls summary {
+  list-style: none;
+  border: 1px solid rgb(231 238 245 / 18%);
+  background: rgb(5 10 15 / 86%);
+  backdrop-filter: blur(10px);
   color: var(--text-0);
-  padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: 10px;
+  padding: 9px 12px;
   letter-spacing: 0.04em;
+  cursor: pointer;
+  text-align: center;
+}
+
+.audioControls summary::-webkit-details-marker {
+  display: none;
+}
+
+.audioControls summary::after {
+  content: '▾';
+  margin-left: 8px;
+  color: var(--accent);
+}
+
+.audioControls[open] summary {
+  border-radius: 10px 10px 6px 6px;
+}
+
+.audioPanel {
+  margin-top: 6px;
+  display: grid;
+  gap: 9px;
+  border: 1px solid rgb(231 238 245 / 14%);
+  background: rgb(5 10 15 / 92%);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.musicToggle {
+  border: 1px solid rgb(231 238 245 / 18%);
+  background: rgb(0 245 255 / 8%);
+  color: var(--text-0);
+  border-radius: 10px;
+  padding: 8px 10px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.musicToggle[aria-pressed='true'] {
+  color: var(--text-dim);
+  border-color: rgb(231 238 245 / 10%);
+}
+
+.audioPanel label {
+  display: grid;
+  gap: 4px;
+  color: #b8cbd9;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.audioPanel input {
+  width: 100%;
+  accent-color: var(--accent);
   cursor: pointer;
 }

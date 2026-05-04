@@ -16,9 +16,37 @@ function MiniGrid({ grid }) {
   )
 }
 
-export default function EndScreen({ mode, round, totalScore, roundScore, breakdown, history, canContinue, onContinue, onReset }) {
+const SCORE_DESCRIPTIONS = {
+  base: 'Each round starts with 1000 base points before penalties, bonuses, or multipliers.',
+  hoverPenalty: 'Each completed hover clue costs 5 points, so fewer checks preserve more score.',
+  livesPenalty: 'Each life lost during the round subtracts 200 points.',
+  timeBonus: 'You earn 10 bonus points for every second you finish under the round par time.',
+  perfectMultiplier: 'A round with no lives lost doubles the score after penalties and bonuses.',
+}
+
+export default function EndScreen({
+  mode,
+  round,
+  totalScore,
+  roundScore,
+  breakdown,
+  history,
+  canContinue,
+  playerName,
+  scoreSaved,
+  onSaveScore,
+  onContinue,
+  onReset,
+}) {
   const title =
     mode === 'gameover' ? 'Game Over' : mode === 'win' ? 'Mission Complete' : `Round ${round} Complete`
+  const showScoreForm = (mode === 'win' || mode === 'gameover') && !scoreSaved
+
+  const handleScoreSubmit = (event) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    onSaveScore(formData.get('name')?.toString() ?? '')
+  }
 
   return (
     <section className={styles.wrap}>
@@ -28,11 +56,11 @@ export default function EndScreen({ mode, round, totalScore, roundScore, breakdo
 
       {breakdown && (
         <div className={styles.breakdown}>
-          <span>Base {breakdown.base}</span>
-          <span>Hover Penalty -{breakdown.hoverPenalty}</span>
-          <span>Lives Penalty -{breakdown.livesPenalty}</span>
-          <span>Time Bonus +{breakdown.timeBonus}</span>
-          <span>Multiplier x{breakdown.perfectMultiplier}</span>
+          <span title={SCORE_DESCRIPTIONS.base}>Base {breakdown.base}</span>
+          <span title={SCORE_DESCRIPTIONS.hoverPenalty}>Hover Penalty -{breakdown.hoverPenalty}</span>
+          <span title={SCORE_DESCRIPTIONS.livesPenalty}>Lives Penalty -{breakdown.livesPenalty}</span>
+          <span title={SCORE_DESCRIPTIONS.timeBonus}>Time Bonus +{breakdown.timeBonus}</span>
+          <span title={SCORE_DESCRIPTIONS.perfectMultiplier}>Multiplier x{breakdown.perfectMultiplier}</span>
         </div>
       )}
 
@@ -45,15 +73,34 @@ export default function EndScreen({ mode, round, totalScore, roundScore, breakdo
         ))}
       </div>
 
+      {showScoreForm && (
+        <form className={styles.scoreForm} onSubmit={handleScoreSubmit}>
+          <label htmlFor="player-name">Name for leaderboard</label>
+          <div>
+            <input
+              id="player-name"
+              name="name"
+              type="text"
+              defaultValue={playerName}
+              maxLength={24}
+              autoComplete="nickname"
+              required
+            />
+            <button type="submit">Save Score</button>
+          </div>
+        </form>
+      )}
+
       <div className={styles.actions}>
         {mode === 'round' && canContinue ? (
           <button type="button" onClick={onContinue}>
             Next Round
           </button>
-        ) : null}
-        <button type="button" onClick={onReset}>
-          Play Again
-        </button>
+        ) : (
+          <button type="button" onClick={onReset}>
+            Play Again
+          </button>
+        )}
       </div>
     </section>
   )

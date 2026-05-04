@@ -4,6 +4,8 @@ const medieval = {
   emoji: '🛡️',
   description: 'Lute plucks and ominous halls',
   colorAccent: '#fbbf24',
+  scale: [0, 2, 3, 5, 7, 8, 10],
+  rootNote: 'D3',
   proximity: {
     0: {
       a: { engine: 'fm', oscillator: 'triangle', note: 'E5', release: '16n', envelope: { attack: 0.002, decay: 0.14, sustain: 0, release: 0.08 } },

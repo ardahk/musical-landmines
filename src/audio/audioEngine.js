@@ -7,14 +7,68 @@ let limiter = null
 let analyser = null
 const activeVoices = []
 let lastHoverAt = 0
-const MAX_POLYPHONY = 4
-let lastAudioError = null
+const MAX_POLYPHONY = 8
+let musicMode = null
+let musicThemeKey = null
+let musicMuted = false
+let musicBaseVolumeDb = -18
+let musicFadeOffsetDb = 0
+let musicFadeTimer = null
+let musicUserVolumeDb = 0
+let sfxUserVolumeDb = 0
+const musicTimers = []
+const MUSIC_FADE_MS = 420
 
 const DEFAULT_SCALE = [0, 2, 4, 5, 7, 9, 11]
 const DEFAULT_ROOT_NOTE = 'C3'
+const DETECTOR_PATTERNS = [
+  { pulseCount: 1, intervalMs: 0, volumeDb: -5, duration: '16n', degree: 0, detuneCents: 0 },
+  { pulseCount: 2, intervalMs: 120, volumeDb: 1, duration: '16n', degree: 4, detuneCents: -12 },
+  { pulseCount: 3, intervalMs: 70, volumeDb: 1, duration: '32n', degree: 7, detuneCents: -28 },
+]
 
 function nowMs() {
   return typeof performance !== 'undefined' ? performance.now() : Date.now()
+}
+
+function clearMusicTimers() {
+  while (musicTimers.length > 0) {
+    window.clearInterval(musicTimers.pop())
+  }
+}
+
+export function stopMusic() {
+  if (musicFadeTimer) {
+    window.clearInterval(musicFadeTimer)
+    musicFadeTimer = null
+  }
+  clearMusicTimers()
+  musicMode = null
+  musicThemeKey = null
+  musicFadeOffsetDb = 0
+}
+
+export function setMusicMuted(nextMuted) {
+  musicMuted = nextMuted
+  if (musicMuted) {
+    stopMusic()
+  }
+}
+
+function levelToDb(level) {
+  const clamped = Math.max(0, Math.min(200, Number(level) || 0))
+  if (clamped <= 100) {
+    return -36 + (clamped / 100) * 36
+  }
+  return ((clamped - 100) / 100) * 14
+}
+
+export function setMusicLevel(level) {
+  musicUserVolumeDb = levelToDb(level)
+}
+
+export function setSfxLevel(level) {
+  sfxUserVolumeDb = levelToDb(level)
 }
 
 function createEffect(effectConfig) {
@@ -93,48 +147,36 @@ function keepPolyphonyBudget() {
   }
 }
 
-function getLevel(adjacentMines) {
+function getClosenessLevel(tile) {
+  if (tile?.isMine) return 2
+  const adjacentMines = tile?.adjacentMines ?? 0
   if (adjacentMines <= 0) return 0
   if (adjacentMines <= 2) return 1
-  if (adjacentMines <= 4) return 2
-  if (adjacentMines <= 6) return 3
-  return 4
+  return 2
 }
 
-// Timbre vector: proximity is expressed through added effects + detune, not pitch.
+// Detector bands are shared across themes so proximity is readable before it is decorative.
 function buildTimbreEffects(level) {
   switch (level) {
     case 0:
-      return []
+      return [{ type: 'filter', frequency: 1800, filterType: 'lowpass' }]
     case 1:
-      return [{ type: 'chorus', frequency: 2.2, depth: 0.25, wet: 0.25 }]
+      return [{ type: 'filter', frequency: 1150, filterType: 'bandpass' }, { type: 'tremolo', frequency: 7, depth: 0.35 }]
     case 2:
-      return [{ type: 'filter', frequency: 900, filterType: 'bandpass' }, { type: 'tremolo', frequency: 5, depth: 0.4 }]
-    case 3:
-      return [{ type: 'distortion', amount: 0.3 }, { type: 'filter', frequency: 1400, filterType: 'lowpass' }]
-    case 4:
     default:
-      return [{ type: 'distortion', amount: 0.55 }, { type: 'bitcrusher', bits: 3, wet: 0.45 }]
+      return [{ type: 'distortion', amount: 0.42 }, { type: 'filter', frequency: 1650, filterType: 'bandpass' }]
   }
 }
 
 function detuneForLevel(level) {
-  // Adds a subtle dissonance as proximity rises; returns cents.
   switch (level) {
     case 0: return 0
-    case 1: return 0
-    case 2: return -8
-    case 3: return -18
-    case 4:
+    case 1: return -12
     default: return -30
   }
 }
 
-// Level 0 = root (safe/low), level 4 = root one octave up (danger/high).
-// Index 7 equals scale.length for the default 7-note scale, so octaveBonus=12 fires and scale[0] = root.
-const PROXIMITY_DEGREES = [0, 2, 4, 5, 7]
-
-function proximityPitch(adjacentMines, theme) {
+function detectorPitch(level, theme) {
   const scale = theme?.scale ?? DEFAULT_SCALE
   const rootNote = theme?.rootNote ?? DEFAULT_ROOT_NOTE
   let rootMidi
@@ -143,11 +185,24 @@ function proximityPitch(adjacentMines, theme) {
   } catch {
     rootMidi = Tone.Frequency(DEFAULT_ROOT_NOTE).toMidi()
   }
-  const level = getLevel(adjacentMines)
-  const degreeIndex = PROXIMITY_DEGREES[level]
+  const degreeIndex = DETECTOR_PATTERNS[level]?.degree ?? 0
   const octaveBonus = degreeIndex >= scale.length ? 12 : 0
   const semitone = scale[degreeIndex % scale.length]
   return Tone.Frequency(rootMidi + semitone + octaveBonus, 'midi').toNote()
+}
+
+function noteForDegree(theme, degreeIndex, octaveOffset = 0) {
+  const scale = theme?.scale ?? DEFAULT_SCALE
+  const rootNote = theme?.rootNote ?? DEFAULT_ROOT_NOTE
+  let rootMidi
+  try {
+    rootMidi = Tone.Frequency(rootNote).toMidi()
+  } catch {
+    rootMidi = Tone.Frequency(DEFAULT_ROOT_NOTE).toMidi()
+  }
+  const octaveBonus = degreeIndex >= scale.length ? 12 : 0
+  const semitone = scale[degreeIndex % scale.length]
+  return Tone.Frequency(rootMidi + semitone + octaveBonus + octaveOffset, 'midi').toNote()
 }
 
 function computePan({ x, gridSize }) {
@@ -155,7 +210,7 @@ function computePan({ x, gridSize }) {
   return ((x / (gridSize - 1)) - 0.5) * 1.2
 }
 
-function playSynth(config, { volumeDb = 0, note, extraEffects = [], detuneCents = 0, pan = 0 } = {}) {
+function playSynth(config, { volumeDb = 0, note, extraEffects = [], detuneCents = 0, pan = 0, release } = {}) {
   if (!initialized || !config) {
     return
   }
@@ -184,9 +239,9 @@ function playSynth(config, { volumeDb = 0, note, extraEffects = [], detuneCents 
   }
 
   if (config.engine === 'noise') {
-    synth.triggerAttackRelease(config.release ?? '8n')
+    synth.triggerAttackRelease(release ?? config.release ?? '8n')
   } else {
-    synth.triggerAttackRelease(note ?? config.note ?? 'C4', config.release ?? '8n')
+    synth.triggerAttackRelease(note ?? config.note ?? 'C4', release ?? config.release ?? '8n')
   }
 
   const nodes = [synth, volume, gain, panner, ...effects]
@@ -197,13 +252,31 @@ function playSynth(config, { volumeDb = 0, note, extraEffects = [], detuneCents 
   activeVoices.push(entry)
 }
 
+function fadeMusicOffset({ fromDb, toDb, durationMs = MUSIC_FADE_MS, onComplete }) {
+  if (musicFadeTimer) {
+    window.clearInterval(musicFadeTimer)
+    musicFadeTimer = null
+  }
+
+  const startedAt = nowMs()
+  musicFadeOffsetDb = fromDb
+  musicFadeTimer = window.setInterval(() => {
+    const pct = Math.min(1, (nowMs() - startedAt) / durationMs)
+    musicFadeOffsetDb = fromDb + ((toDb - fromDb) * pct)
+    if (pct >= 1) {
+      window.clearInterval(musicFadeTimer)
+      musicFadeTimer = null
+      onComplete?.()
+    }
+  }, 30)
+}
+
 export async function initializeAudio() {
   if (initialized) {
     return true
   }
 
   try {
-    lastAudioError = null
     await Tone.start()
     if (Tone.context.state !== 'running') {
       await Tone.context.resume()
@@ -217,14 +290,9 @@ export async function initializeAudio() {
     limiter.toDestination()
     initialized = true
     return true
-  } catch (error) {
-    lastAudioError = error instanceof Error ? error.message : String(error)
+  } catch {
     return false
   }
-}
-
-export function getLastAudioError() {
-  return lastAudioError
 }
 
 export function getAnalyser() {
@@ -239,6 +307,136 @@ function getBaseVoice(theme) {
   return theme?.baseVoice ?? theme?.proximity?.[0]?.a ?? null
 }
 
+function getDetectorVoice(theme, level) {
+  if (theme?.detectorVoices?.[level]) {
+    return theme.detectorVoices[level]
+  }
+  const proximityKey = level === 0 ? 0 : level === 1 ? 2 : 4
+  return theme?.proximity?.[proximityKey]?.a ?? getBaseVoice(theme)
+}
+
+function getMusicVoice(theme, overrides = {}) {
+  return {
+    engine: overrides.engine ?? 'synth',
+    oscillator: overrides.oscillator ?? 'sine',
+    release: overrides.release ?? '8n',
+    envelope: overrides.envelope ?? { attack: 0.02, decay: 0.18, sustain: 0.12, release: 0.3 },
+    effects: overrides.effects ?? theme?.proximity?.[0]?.a?.effects ?? [{ type: 'reverb', wet: 0.18, decay: 1.8 }],
+  }
+}
+
+function startMusicPattern({ mode, theme, degrees, intervalMs, volumeDb, octaveOffset = 12, voice }) {
+  const themeKey = theme?.key ?? 'menu'
+  if (!initialized || musicMuted) {
+    return
+  }
+
+  if (musicMode === mode && musicThemeKey === themeKey) {
+    musicBaseVolumeDb = volumeDb
+    return
+  }
+
+  const startNewPattern = () => {
+    clearMusicTimers()
+    musicMode = mode
+    musicThemeKey = themeKey
+    musicBaseVolumeDb = volumeDb
+    musicFadeOffsetDb = -18
+
+    let step = 0
+    const playStep = () => {
+      const degree = degrees[step % degrees.length]
+      const note = noteForDegree(theme, degree, octaveOffset)
+      const pan = step % 2 === 0 ? -0.18 : 0.18
+      playSynth(voice ?? getMusicVoice(theme), {
+        volumeDb: musicBaseVolumeDb + musicFadeOffsetDb + musicUserVolumeDb,
+        note,
+        pan,
+        release: '8n',
+      })
+      step += 1
+    }
+
+    playStep()
+    musicTimers.push(window.setInterval(playStep, intervalMs))
+    fadeMusicOffset({ fromDb: -18, toDb: 0 })
+  }
+
+  if (musicMode) {
+    fadeMusicOffset({
+      fromDb: musicFadeOffsetDb,
+      toDb: -18,
+      onComplete: startNewPattern,
+    })
+    return
+  }
+
+  startNewPattern()
+}
+
+export function startMenuMusic() {
+  startMusicPattern({
+    mode: 'menu',
+    theme: { key: 'menu', scale: DEFAULT_SCALE, rootNote: DEFAULT_ROOT_NOTE },
+    degrees: [0, 2, 4, 7, 4, 2],
+    intervalMs: 760,
+    volumeDb: -17,
+    octaveOffset: 12,
+    voice: getMusicVoice(null, {
+      oscillator: 'triangle',
+      envelope: { attack: 0.04, decay: 0.22, sustain: 0.1, release: 0.4 },
+      effects: [{ type: 'reverb', wet: 0.25, decay: 2.2 }],
+    }),
+  })
+}
+
+export function startThemeMusic(theme) {
+  startMusicPattern({
+    mode: 'theme',
+    theme,
+    degrees: [0, 2, 4, 2, 5, 4, 2, 1],
+    intervalMs: 620,
+    volumeDb: -27,
+    octaveOffset: 12,
+    voice: getMusicVoice(theme, {
+      oscillator: theme?.key === 'retro' ? 'square' : theme?.key === 'horror' ? 'triangle' : 'sine',
+      effects: theme?.proximity?.[1]?.a?.effects ?? theme?.proximity?.[0]?.a?.effects,
+    }),
+  })
+}
+
+export function playTransitionMusic(theme) {
+  if (!initialized || musicMuted || !theme) {
+    return
+  }
+
+  if (musicMode === 'transition' && musicThemeKey === theme.key) {
+    return
+  }
+
+  clearMusicTimers()
+  musicMode = 'transition'
+  musicThemeKey = theme.key
+  musicBaseVolumeDb = -18
+  musicFadeOffsetDb = 0
+
+  const degrees = [0, 2, 4, 5, 7]
+  degrees.forEach((degree, index) => {
+    const timeoutId = window.setTimeout(() => {
+      playSynth(getMusicVoice(theme, {
+        oscillator: theme.key === 'retro' ? 'square' : 'triangle',
+        envelope: { attack: 0.01, decay: 0.18, sustain: 0.08, release: 0.24 },
+      }), {
+        volumeDb: -15 + index + musicUserVolumeDb,
+        note: noteForDegree(theme, degree, 12),
+        pan: ((index / (degrees.length - 1)) - 0.5) * 0.8,
+        release: '16n',
+      })
+    }, index * 150)
+    musicTimers.push(timeoutId)
+  })
+}
+
 export function playTileSound(tile, { volumeDb = 0 } = {}) {
   const now = nowMs()
   if (now - lastHoverAt < 80) {
@@ -250,29 +448,41 @@ export function playTileSound(tile, { volumeDb = 0 } = {}) {
     return
   }
 
-  const base = getBaseVoice(currentTheme)
-  if (!base) return
+  const level = getClosenessLevel(tile)
+  const detectorVoice = getDetectorVoice(currentTheme, level)
+  if (!detectorVoice) return
 
-  const level = getLevel(tile.adjacentMines)
-  const note = proximityPitch(tile.adjacentMines, currentTheme)
+  const pattern = DETECTOR_PATTERNS[level]
+  const note = detectorPitch(level, currentTheme)
   const pan = computePan(tile)
   const extraEffects = buildTimbreEffects(level)
-  const detuneCents = detuneForLevel(level)
+  const detuneCents = pattern.detuneCents ?? detuneForLevel(level)
 
-  playSynth(base, { volumeDb, note, extraEffects, detuneCents, pan })
+  for (let i = 0; i < pattern.pulseCount; i += 1) {
+    window.setTimeout(() => {
+      playSynth(detectorVoice, {
+        volumeDb: volumeDb + pattern.volumeDb + sfxUserVolumeDb,
+        note,
+        extraEffects,
+        detuneCents,
+        pan,
+        release: pattern.duration,
+      })
+    }, i * pattern.intervalMs)
+  }
 }
 
 export function playMineExplosion() {
   if (!currentTheme) return
-  playSynth(currentTheme.explosion, { volumeDb: -6 })
+  playSynth(currentTheme.explosion, { volumeDb: -6 + sfxUserVolumeDb })
 }
 
 export function playSuccess() {
   if (!currentTheme) return
-  playSynth(currentTheme.success, { volumeDb: -15 })
+  playSynth(currentTheme.success, { volumeDb: -15 + sfxUserVolumeDb })
 }
 
 export function playRoundComplete() {
   if (!currentTheme) return
-  playSynth(currentTheme.roundComplete, { volumeDb: -10 })
+  playSynth(currentTheme.roundComplete, { volumeDb: -10 + sfxUserVolumeDb })
 }

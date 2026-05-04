@@ -115,16 +115,6 @@ export function generateGrid(size, mineDensity) {
   return grid
 }
 
-export function createNeighborMap(grid) {
-  const map = {}
-  for (let y = 0; y < grid.length; y += 1) {
-    for (let x = 0; x < grid.length; x += 1) {
-      map[`${x},${y}`] = getNeighbors(grid, x, y).map((neighbor) => neighbor.adjacentMines)
-    }
-  }
-  return map
-}
-
 export function isWinCondition(grid, goal) {
   const goalCell = grid[goal.y][goal.x]
   return goalCell.state === 'visited'

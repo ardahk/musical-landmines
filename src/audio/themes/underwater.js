@@ -4,6 +4,11 @@ const underwater = {
   emoji: '🌊',
   description: 'Pressure drones and liquid echoes',
   colorAccent: '#38bdf8',
+  scale: [0, 3, 5, 7, 10],
+  rootNote: 'E2',
+  detectorVoices: {
+    1: { engine: 'fm', oscillator: 'triangle', note: 'A4', release: '16n', envelope: { attack: 0.006, decay: 0.16, sustain: 0.04, release: 0.08 }, effects: [{ type: 'filter', frequency: 1800, filterType: 'bandpass' }] },
+  },
   proximity: {
     0: {
       a: { engine: 'synth', oscillator: 'sine', note: 'D5', release: '16n', envelope: { attack: 0.003, decay: 0.16, sustain: 0, release: 0.1 }, effects: [{ type: 'chorus', frequency: 1.5, delayTime: 2.2, depth: 0.2, wet: 0.3 }] },

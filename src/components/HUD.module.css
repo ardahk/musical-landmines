@@ -5,34 +5,46 @@
   gap: 12px;
   border: 1px solid rgb(231 238 245 / 12%);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 10px 16px;
   background: linear-gradient(135deg, rgb(10 15 20 / 92%), rgb(6 9 13 / 95%));
+  font-family: 'Syne', sans-serif;
 }
 
-.hud > div {
+.group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 18px;
 }
 
-.hud strong {
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.06em;
+.stat {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
 }
 
-.hud span {
-  color: #c3d3e0;
+.label {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8594a6;
 }
 
-.lifeLabel {
-  color: #fef6cf;
+.value {
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  color: #e7eef5;
+}
+
+.lives {
+  color: #ffb7c5;
+  letter-spacing: 0.1em;
 }
 
 .timer {
   color: #a8f4d3;
 }
 
-.timerDanger {
+.danger {
   color: var(--danger);
 }
 
@@ -40,6 +52,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-size: 0.85rem;
+  color: #c3d3e0;
 }
 
 .theme i {
@@ -47,4 +61,5 @@
   aspect-ratio: 1;
   border-radius: 50%;
   display: inline-block;
+  box-shadow: 0 0 8px currentColor;
 }

@@ -4,6 +4,8 @@ const retro = {
   emoji: '🕹️',
   description: 'Chiptune beeps and game-over stabs',
   colorAccent: '#ff9f1c',
+  scale: [0, 2, 4, 5, 7, 9, 11],
+  rootNote: 'C4',
   proximity: {
     0: {
       a: { engine: 'synth', oscillator: 'square', note: 'C5', release: '16n', envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.06 } },

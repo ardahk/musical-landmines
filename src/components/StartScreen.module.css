@@ -9,7 +9,9 @@
   overflow: hidden;
   display: grid;
   align-content: center;
+  justify-items: center;
   gap: 18px;
+  text-align: center;
   box-shadow: 0 28px 80px rgb(0 0 0 / 45%);
 }
 
@@ -27,6 +29,7 @@
 .wrap h1,
 .wrap p,
 .wrap ul,
+.soundGuide,
 .wrap button {
   position: relative;
   z-index: 1;
@@ -49,7 +52,97 @@
   margin: 0;
   padding-left: 20px;
   display: grid;
+  justify-items: start;
   gap: 8px;
+  color: #bfd0de;
+  text-align: left;
+}
+
+.soundGuide {
+  width: min(560px, 100%);
+  border: 1px solid rgb(231 238 245 / 12%);
+  border-radius: 10px;
+  padding: 14px;
+  background: rgb(5 11 16 / 68%);
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.soundGuide h2 {
+  margin: 0;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.soundGuide dl {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.soundGuide div {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+}
+
+.soundGuide dt {
+  color: #ecf9ff;
+  font-weight: 700;
+}
+
+.soundGuide dt button {
+  --arming-progress: 0deg;
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgb(0 245 255 / 34%);
+  background:
+    linear-gradient(155deg, rgb(11 18 25 / 95%), rgb(7 12 18 / 95%));
+  color: #ecf9ff;
+  padding: 8px 10px;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 80ms ease, filter 80ms ease, border-color 80ms ease;
+}
+
+.soundGuide dt button:hover {
+  transform: scale(1.04);
+  filter: brightness(1.14);
+  border-color: var(--accent);
+}
+
+.soundGuide dt button.armingExample {
+  border-color: var(--accent);
+}
+
+.soundGuide dt button.armingExample::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  padding: 1.5px;
+  background: conic-gradient(
+    var(--accent) var(--arming-progress),
+    transparent var(--arming-progress)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.soundGuide dd {
+  margin: 0;
   color: #bfd0de;
 }
 
@@ -64,6 +157,42 @@
   letter-spacing: 0.06em;
   cursor: pointer;
   font-weight: 500;
+}
+
+.wrap .soundGuide dt button {
+  width: 100%;
+  padding: 8px 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+.yourScore {
+  position: relative;
+  z-index: 1;
+  width: min(300px, 100%);
+  border: 1px solid rgb(231 238 245 / 12%);
+  border-radius: 10px;
+  padding: 18px;
+  background: rgb(5 11 16 / 68%);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.yourScore span {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bfd0de;
+}
+
+.yourScore strong {
+  color: #ecf9ff;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
 }
 
 @keyframes pulse {

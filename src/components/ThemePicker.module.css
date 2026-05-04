@@ -23,7 +23,7 @@ header p {
 .grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .card {
@@ -33,8 +33,9 @@ header p {
     linear-gradient(140deg, rgb(8 15 20 / 92%), rgb(6 10 15 / 95%));
   border-radius: 14px;
   color: var(--text-0);
-  padding: 18px;
+  padding: 16px;
   min-height: 132px;
+  min-width: 0;
   display: grid;
   gap: 10px;
   text-align: left;
@@ -51,6 +52,26 @@ header p {
   font-size: 1.4rem;
 }
 
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.miniPreview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  width: 48px;
+  height: 48px;
+}
+
+.miniPreview span {
+  border-radius: 3px;
+  background: color-mix(in oklab, var(--card-accent), transparent 70%);
+  opacity: calc(0.3 + (var(--i) % 5) * 0.14);
+}
+
 .card strong {
   font-family: 'Syne', sans-serif;
   letter-spacing: 0.05em;
@@ -59,4 +80,10 @@ header p {
 .card small {
   color: #b6c6d4;
   line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

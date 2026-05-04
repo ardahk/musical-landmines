@@ -1,11 +1,11 @@
 import scifi from './scifi'
 import nature from './nature'
 import underwater from './underwater'
-import horror from './horror'
 import medieval from './medieval'
 import retro from './retro'
+import horror from './horror'
 
-export const themesList = [scifi, nature, underwater, horror, medieval, retro]
+export const themesList = [scifi, nature, underwater, medieval, retro, horror]
 
 export const themeMap = themesList.reduce((acc, theme) => {
   acc[theme.key] = theme

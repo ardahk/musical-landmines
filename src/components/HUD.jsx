@@ -7,24 +7,34 @@ function formatTimer(ms) {
   return `${m}:${s}`
 }
 
+function Stat({ label, value, tone }) {
+  return (
+    <div className={styles.stat}>
+      <span className={styles.label}>{label}</span>
+      <span className={`${styles.value} ${tone ? styles[tone] : ''}`}>{value}</span>
+    </div>
+  )
+}
+
 export default function HUD({ round, totalScore, lives, elapsedMs, parTime, theme }) {
   const overtime = elapsedMs / 1000 > parTime
+  const hearts = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(Math.max(0, 5 - lives))
 
   return (
     <header className={styles.hud}>
-      <div>
-        <strong>Round {round}</strong>
-        <span>Score {totalScore}</span>
+      <div className={styles.group}>
+        <Stat label="Round" value={round} />
+        <Stat label="Score" value={totalScore} />
       </div>
-      <div>
-        <span className={styles.lifeLabel}>Lives {'◉'.repeat(Math.max(0, lives))}</span>
+      <div className={styles.group}>
+        <Stat label="Lives" value={hearts} tone="lives" />
       </div>
-      <div>
-        <span className={overtime ? styles.timerDanger : styles.timer}>{formatTimer(elapsedMs)}</span>
-        <span className={styles.theme}>
+      <div className={styles.group}>
+        <Stat label="Time" value={formatTimer(elapsedMs)} tone={overtime ? 'danger' : 'timer'} />
+        <div className={styles.theme}>
           <i style={{ background: theme.colorAccent }} />
           {theme.name}
-        </span>
+        </div>
       </div>
     </header>
   )
