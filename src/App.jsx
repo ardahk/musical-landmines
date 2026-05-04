@@ -163,7 +163,7 @@ export default function App() {
       return undefined
     }
 
-    if (state.screen === 'game') {
+    if (['game', 'roundEnd', 'gameOver', 'win'].includes(state.screen)) {
       startThemeMusic(selectedTheme)
       return undefined
     }
